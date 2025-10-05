@@ -24,12 +24,11 @@ const CreateListModal = ({ onClose, onSubmit }) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    console.log('📝 CreateListModal submitting:', formData);
     setLoading(true);
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error('❌ CreateListModal error:', error);
+      console.error('Create list error:', error);
     } finally {
       setLoading(false);
     }

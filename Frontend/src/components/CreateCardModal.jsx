@@ -22,12 +22,11 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
     e.preventDefault();
     if (!formData.title.trim()) return;
 
-    console.log('📝 CreateCardModal submitting:', formData);
     setLoading(true);
     try {
       await onSubmit(formData);
     } catch (error) {
-      console.error('❌ CreateCardModal error:', error);
+      console.error('Create card error:', error);
     } finally {
       setLoading(false);
     }

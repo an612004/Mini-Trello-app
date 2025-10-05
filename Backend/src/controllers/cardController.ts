@@ -206,35 +206,21 @@ export class CardController {
       const { boardId, id } = req.params;
       const userId = req.user!.id;
 
-      console.log('🗑️ Delete card request:', { boardId, cardId: id, userId });
-
       // Check board access
       const board = await FirebaseService.getBoardById(boardId);
       if (!board || !board.members.includes(userId)) {
-        console.log('❌ Access denied - user not in board members');
-        return res.status(403).json({ error: 'Access denied' });
+        return res.status(403).json({ error: 'Bạn không có quyền truy cập board này' });
       }
 
       const card = await FirebaseService.getCardById(id);
-      console.log('📋 Card found:', { cardId: id, ownerId: card?.ownerId, boardId: card?.boardId });
 
       if (!card || card.boardId !== boardId) {
-        console.log('❌ Card not found or wrong board');
-        return res.status(404).json({ error: 'Card not found' });
+        return res.status(404).json({ error: 'Card không tồn tại' });
       }
 
-      // Check if user is card owner or board owner - Temporarily allow all board members
-      console.log('👤 Permission check:', { 
-        cardOwnerId: card.ownerId, 
-        boardOwnerId: board.ownerId, 
-        currentUserId: userId,
-        isBoardMember: board.members.includes(userId) 
-      });
-      
-      // Temporarily allow any board member to delete cards for testing
+      // Check if user is board member
       if (!board.members.includes(userId)) {
-        console.log('❌ Permission denied - not a board member');
-        return res.status(403).json({ error: 'Only board members can delete cards' });
+        return res.status(403).json({ error: 'Chỉ thành viên board mới có thể xóa card' });
       }
 
       // Delete all tasks in this card first
@@ -248,7 +234,7 @@ export class CardController {
       res.status(204).send();
     } catch (error) {
       console.error('Delete card error:', error);
-      res.status(500).json({ error: 'Failed to delete card' });
+      res.status(500).json({ error: 'Không thể xóa card' });
     }
   }
 

@@ -13,42 +13,17 @@ const api = axios.create({
 // Add token to requests if available
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
-  console.log('🔐 API Request interceptor:', {
-    url: config.url,
-    method: config.method,
-    hasToken: !!token,
-    tokenPreview: token ? token.substring(0, 20) + '...' : 'None'
-  });
-  
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
-  } else {
-    console.warn('⚠️ No auth token found in localStorage');
   }
   return config;
 });
 
 // Handle response errors
 api.interceptors.response.use(
-  (response) => {
-    console.log('✅ API Response success:', {
-      url: response.config.url,
-      status: response.status,
-      data: response.data
-    });
-    return response;
-  },
+  (response) => response,
   (error) => {
-    console.error('❌ API Response error:', {
-      url: error.config?.url,
-      method: error.config?.method,
-      status: error.response?.status,
-      data: error.response?.data,
-      message: error.message
-    });
-    
     if (error.response?.status === 401) {
-      console.warn('🔑 Token expired or invalid, redirecting to login');
       // Token expired or invalid
       localStorage.removeItem('token');
       localStorage.removeItem('user');
@@ -85,55 +60,20 @@ export const cardsAPI = {
   update: (boardId, cardId, data) => api.put(`/boards/${boardId}/cards/${cardId}`, data),
   delete: async (boardId, cardId) => {
     const url = `/boards/${boardId}/cards/${cardId}`;
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    
-    console.log('🗑️ CardsAPI.delete called:', { 
-      boardId, 
-      cardId, 
-      url,
-      fullUrl: `${API_BASE_URL}${url}`,
-      hasToken: !!token,
-      tokenPreview: token ? token.substring(0, 30) + '...' : 'None',
-      hasUser: !!user,
-      userData: user ? JSON.parse(user) : null,
-      baseURL: API_BASE_URL 
-    });
-
-    // Check if we have authentication
-    if (!token) {
-      console.error('❌ No authentication token found');
-      throw new Error('Authentication required. Please login.');
-    }
     
     try {
-      console.log('📡 Making DELETE request to:', `${API_BASE_URL}${url}`);
       const response = await api.delete(url);
-      console.log('✅ CardsAPI.delete success:', response);
       return response;
     } catch (error) {
-      console.error('❌ CardsAPI.delete error:', {
-        url: `${API_BASE_URL}${url}`,
-        status: error.response?.status,
-        data: error.response?.data,
-        message: error.message,
-        headers: error.response?.headers,
-        config: {
-          method: error.config?.method,
-          url: error.config?.url,
-          headers: error.config?.headers
-        }
-      });
-      
       // Provide more specific error messages
       if (error.response?.status === 401) {
-        throw new Error('Authentication failed. Please login again.');
+        throw new Error('Vui lòng đăng nhập lại');
       } else if (error.response?.status === 403) {
-        throw new Error('You do not have permission to delete this card.');
+        throw new Error('Bạn không có quyền xóa card này');
       } else if (error.response?.status === 404) {
-        throw new Error('Card not found or already deleted.');
+        throw new Error('Card không tồn tại');
       } else if (!error.response) {
-        throw new Error('Network error. Check if backend server is running.');
+        throw new Error('Lỗi kết nối mạng');
       }
       
       throw error;

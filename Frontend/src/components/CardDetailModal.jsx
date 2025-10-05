@@ -308,170 +308,33 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
               </div>
             </div>
 
-            <div className="pt-4 space-y-2">
-              <button 
-                onClick={() => {
-                  const token = localStorage.getItem('token');
-                  const user = localStorage.getItem('user');
-                  console.log('🔍 Auth Status Check:', {
-                    hasToken: !!token,
-                    tokenLength: token?.length || 0,
-                    hasUser: !!user,
-                    userData: user ? JSON.parse(user) : null,
-                    localStorage: {
-                      allKeys: Object.keys(localStorage),
-                      tokenValue: token
-                    }
-                  });
-                  alert(`Token: ${token ? 'Có (' + token.length + ' chars)' : 'Không có'}\nUser: ${user ? 'Có' : 'Không có'}\nAll localStorage keys: ${Object.keys(localStorage).join(', ')}`);
-                }}
-                className="w-full flex items-center justify-center px-3 py-1 bg-blue-600 hover:bg-blue-700 rounded text-xs transition-colors"
-              >
-                Check Auth
-              </button>
-              
-              <button 
-                onClick={async () => {
-                  try {
-                    console.log('🧪 Testing backend connection...');
-                    const response = await fetch('http://localhost:3000/boards');
-                    const text = await response.text();
-                    console.log('🔗 Backend response:', {
-                      status: response.status,
-                      statusText: response.statusText,
-                      body: text
-                    });
-                    alert(`Backend Status: ${response.status}\nResponse: ${text}`);
-                  } catch (error) {
-                    console.error('❌ Backend connection error:', error);
-                    alert(`Backend Error: ${error.message}`);
-                  }
-                }}
-                className="w-full flex items-center justify-center px-3 py-1 bg-green-600 hover:bg-green-700 rounded text-xs transition-colors"
-              >
-                Test Backend
-              </button>
-              
-              <button 
-                onClick={async () => {
-                  try {
-                    // Test with the current token
-                    const token = localStorage.getItem('token');
-                    console.log('🧪 Testing API with current token...');
-                    
-                    const response = await fetch('http://localhost:3000/boards', {
-                      method: 'GET',
-                      headers: {
-                        'Authorization': `Bearer ${token}`,
-                        'Content-Type': 'application/json'
+            <div className="pt-4">
+              {/* Danger Zone */}
+              <div className="border-t border-gray-700 pt-4">
+                <h5 className="text-xs font-medium text-red-400 mb-3 uppercase tracking-wider">Danger Zone</h5>
+                <button 
+                  onClick={async () => {
+                    if (window.confirm('⚠️ Xác nhận xóa card\n\nBạn có chắc chắn muốn xóa card này không? Hành động này không thể hoàn tác và sẽ xóa tất cả tasks bên trong.')) {
+                      try {
+                        setLoading(true);
+                        await onDelete(card.id);
+                        onClose();
+                      } catch (error) {
+                        console.error('Delete card error:', error);
+                        const errorMessage = error.response?.data?.error || error.message || 'Không thể xóa card';
+                        alert(`❌ ${errorMessage}`);
+                      } finally {
+                        setLoading(false);
                       }
-                    });
-                    
-                    const text = await response.text();
-                    console.log('🔗 API Test with token:', {
-                      status: response.status,
-                      statusText: response.statusText,
-                      body: text,
-                      token: token ? token.substring(0, 20) + '...' : 'None'
-                    });
-                    
-                    alert(`API Test with Token:\nStatus: ${response.status}\nResponse: ${text}`);
-                  } catch (error) {
-                    console.error('❌ API test error:', error);
-                    alert(`API Test Error: ${error.message}`);
-                  }
-                }}
-                className="w-full flex items-center justify-center px-3 py-1 bg-purple-600 hover:bg-purple-700 rounded text-xs transition-colors"
-              >
-                Test API Auth
-              </button>
-              
-              <button 
-                onClick={async () => {
-                  try {
-                    // Generate a valid JWT token for testing
-                    const payload = {
-                      id: 'test-user-123',
-                      email: 'test@example.com',
-                      name: 'Test User',
-                      iat: Math.floor(Date.now() / 1000),
-                      exp: Math.floor(Date.now() / 1000) + (60 * 60 * 24) // 24 hours
-                    };
-                    
-                    // For testing, we'll create a simple token
-                    // In a real app, this should be done on the server side
-                    const testToken = btoa(JSON.stringify(payload));
-                    
-                    localStorage.setItem('token', testToken);
-                    localStorage.setItem('user', JSON.stringify({ 
-                      id: 'test-user-123', 
-                      email: 'test@example.com',
-                      name: 'Test User'
-                    }));
-                    
-                    console.log('🔑 Generated test token:', testToken);
-                    alert('Generated test token! Check console for details.');
-                  } catch (error) {
-                    console.error('❌ Token generation error:', error);
-                    alert(`Token Error: ${error.message}`);
-                  }
-                }}
-                className="w-full flex items-center justify-center px-3 py-1 bg-orange-600 hover:bg-orange-700 rounded text-xs transition-colors"
-              >
-                Generate Token
-              </button>
-              
-              <button 
-                onClick={() => {
-                  // Clear all auth data and redirect to login
-                  localStorage.removeItem('token');
-                  localStorage.removeItem('user');
-                  alert('Auth cleared! You need to login properly.');
-                  // In real app, redirect to login page
-                  window.location.href = '/login';
-                }}
-                className="w-full flex items-center justify-center px-3 py-1 bg-red-500 hover:bg-red-600 rounded text-xs transition-colors"
-              >
-                Go to Login
-              </button>
-              
-              <button 
-                onClick={async () => {
-                  if (window.confirm('Bạn có chắc chắn muốn xóa card này?')) {
-                    try {
-                      setLoading(true);
-                      console.log('🗑️ CardDetailModal: Attempting to delete card:', card.id);
-                      
-                      // Check auth before delete
-                      const token = localStorage.getItem('token');
-                      if (!token) {
-                        throw new Error('Bạn cần đăng nhập để xóa card');
-                      }
-                      
-                      await onDelete(card.id);
-                      console.log('✅ CardDetailModal: Delete successful, closing modal');
-                      onClose(); // Close modal after successful delete
-                    } catch (error) {
-                      console.error('❌ CardDetailModal delete error:', error);
-                      console.error('❌ Error details:', {
-                        message: error.message,
-                        response: error.response?.data,
-                        status: error.response?.status,
-                        cardId: card.id
-                      });
-                      const errorMessage = error.response?.data?.error || error.message || 'Không xác định';
-                      alert(`Không thể xóa card.\nLỗi: ${errorMessage}\nVui lòng thử lại.`);
-                    } finally {
-                      setLoading(false);
                     }
-                  }
-                }}
-                disabled={loading}
-                className="w-full flex items-center space-x-2 px-3 py-2 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded text-sm transition-colors"
-              >
-                <Archive className="w-4 h-4" />
-                <span>{loading ? 'Đang xóa...' : 'Delete Card'}</span>
-              </button>
+                  }}
+                  disabled={loading}
+                  className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                >
+                  <Archive className="w-4 h-4" />
+                  <span>{loading ? 'Đang xóa...' : '🗑️ Xóa Card Vĩnh Viễn'}</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>

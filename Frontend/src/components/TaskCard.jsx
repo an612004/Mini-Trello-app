@@ -80,7 +80,6 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
       onClick={(e) => {
         // Only show detail modal if not clicking on menu button or drag handle
         if (!showMenu && !e.target.closest('.menu-button') && !e.target.closest('[data-drag-handle]')) {
-          console.log('Card clicked, opening detail modal for:', card);
           setShowDetailModal(true);
         }
       }}
@@ -102,7 +101,6 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
           <button
             onClick={(e) => {
               e.stopPropagation();
-              console.log('Menu button clicked');
               setShowMenu(!showMenu);
             }}
             className="opacity-0 group-hover:opacity-100 p-1 hover:bg-gray-100 rounded transition-all menu-button"
@@ -134,17 +132,15 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
                   }
                   
                   setIsDeleting(true);
-                  console.log('🗑️ Attempting to delete card:', card.id);
                   
                   try {
                     if (typeof onDelete === 'function') {
                       await onDelete(card.id);
-                      console.log('✅ Card deleted successfully:', card.id);
                     } else {
-                      throw new Error('onDelete function is not available');
+                      throw new Error('Chức năng xóa không khả dụng');
                     }
                   } catch (error) {
-                    console.error('❌ Delete failed:', error);
+                    console.error('Delete card error:', error);
                     alert('Không thể xóa card: ' + (error.response?.data?.error || error.message));
                   } finally {
                     setIsDeleting(false);
@@ -299,7 +295,6 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
         card={card}
         boardMembers={boardMembers || []}
         onClose={() => {
-          console.log('Closing detail modal');
           setShowDetailModal(false);
         }}
         onUpdate={onUpdate}

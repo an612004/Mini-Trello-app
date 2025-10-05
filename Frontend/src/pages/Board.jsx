@@ -154,55 +154,15 @@ const Board = () => {
   };
 
   const handleDeleteCard = async (cardId) => {
-    console.log('🗑️ Board handleDeleteCard called with:', { cardId, boardId });
-    
-    // Check authentication
-    const token = localStorage.getItem('token');
-    console.log('🔐 Auth token exists:', !!token);
-    if (!token) {
-      console.error('❌ No authentication token found');
-      throw new Error('Bạn cần đăng nhập để xóa card');
-    }
-    
     try {
       // Call API to delete card from backend
-      console.log('📡 Calling cardsAPI.delete with:', { boardId, cardId });
-      const response = await cardsAPI.delete(boardId, cardId);
-      console.log('✅ API delete successful, response:', response);
+      await cardsAPI.delete(boardId, cardId);
       
       // Remove card from Redux store
-      console.log('🔄 Updating Redux store...');
       dispatch(removeCard(cardId));
-      console.log('✅ Redux store updated');
-      
-      console.log('✅ Card deleted successfully:', cardId);
     } catch (error) {
-      console.error('❌ Failed to delete card:', error);
-      console.error('❌ Error details:', {
-        message: error.message,
-        response: error.response?.data,
-        status: error.response?.status,
-        url: error.config?.url,
-        method: error.config?.method
-      });
-      
-      // Provide specific error messages
-      let errorMessage = 'Failed to delete card';
-      if (error.response?.status === 401) {
-        errorMessage = 'Unauthorized - Please login again';
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
-      } else if (error.response?.status === 403) {
-        errorMessage = 'You do not have permission to delete this card';
-      } else if (error.response?.status === 404) {
-        errorMessage = 'Card not found';
-      } else if (error.response?.data?.error) {
-        errorMessage = error.response.data.error;
-      }
-      
-      const customError = new Error(errorMessage);
-      customError.response = error.response;
-      throw customError;
+      console.error('Failed to delete card:', error);
+      throw error; // Re-throw to let UI components handle the error display
     }
   };
 
