@@ -269,5 +269,49 @@ export class BoardController {
     }
   }
 
+  // Remove member from board
+  static async removeMember(req: AuthRequest, res: Response) {
+    try {
+      const { id, memberId } = req.params;
+      const userId = req.user!.id;
+
+      console.log('🗑️ Remove member request:', { boardId: id, memberId, requesterId: userId });
+
+      const board = await FirebaseService.getBoardById(id);
+
+      if (!board) {
+        return res.status(404).json({ error: 'Board không tồn tại' });
+      }
+
+      // Only owner can remove members, or members can leave themselves
+      if (board.ownerId !== userId && memberId !== userId) {
+        return res.status(403).json({ error: 'Chỉ chủ board hoặc bản thân mới có thể xóa thành viên' });
+      }
+
+      // Cannot remove board owner
+      if (memberId === board.ownerId) {
+        return res.status(400).json({ error: 'Không thể xóa chủ board' });
+      }
+
+      // Check if member exists in board
+      if (!board.members.includes(memberId)) {
+        return res.status(400).json({ error: 'Người dùng không phải thành viên của board' });
+      }
+
+      // Remove member from board
+      const updatedMembers = board.members.filter(member => member !== memberId);
+      await FirebaseService.updateBoard(id, { members: updatedMembers });
+
+      console.log('✅ Member removed successfully');
+
+      res.status(200).json({ 
+        success: true,
+        message: 'Thành viên đã được xóa khỏi board'
+      });
+    } catch (error) {
+      console.error('Remove member error:', error);
+      res.status(500).json({ error: 'Không thể xóa thành viên' });
+    }
+  }
 
 }

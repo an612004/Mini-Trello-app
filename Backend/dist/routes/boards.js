@@ -16,5 +16,7 @@ router.delete('/:id', boardController_1.BoardController.deleteBoard);
 router.post('/:boardId/invite', boardController_1.BoardController.inviteToBoard);
 // Accept invitation (can be called from different contexts)
 router.post('/invitations/accept', boardController_1.BoardController.acceptBoardInvitation);
+// Remove member from board
+router.delete('/:id/members/:memberId', boardController_1.BoardController.removeMember);
 exports.default = router;
 //# sourceMappingURL=boards.js.map

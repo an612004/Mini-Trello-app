@@ -72,10 +72,19 @@ const Column = ({ column, cards, boardId, boardMembers, onAddCard, onDeleteCard,
         {/* Drop Zone */}
         <div
           ref={setNodeRef}
-          className={`min-h-[200px] space-y-3 ${
-            isOver ? 'bg-black-50 border-2 border-dashed border-blue-300 rounded-lg p-2' : ''
+          className={`min-h-[200px] space-y-3 transition-all duration-200 ${
+            isOver ? 'bg-blue-50 border-2 border-dashed border-blue-400 rounded-lg p-2 bg-opacity-50' : ''
           }`}
         >
+          {isOver && (
+            <div className="bg-blue-100 border border-blue-300 rounded-lg p-4 text-center text-blue-600 font-medium">
+              <div className="flex items-center justify-center space-x-2">
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
+                <span>Thả card vào đây</span>
+                <div className="w-2 h-2 bg-blue-500 rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
+              </div>
+            </div>
+          )}
           <SortableContext items={cards.map(card => card.id)} strategy={verticalListSortingStrategy}>
             {cards.map(card => (
               <TaskCard 

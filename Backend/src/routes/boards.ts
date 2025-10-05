@@ -20,4 +20,7 @@ router.post('/:boardId/invite', BoardController.inviteToBoard);
 // Accept invitation (can be called from different contexts)
 router.post('/invitations/accept', BoardController.acceptBoardInvitation);
 
+// Remove member from board
+router.delete('/:id/members/:memberId', BoardController.removeMember);
+
 export default router;

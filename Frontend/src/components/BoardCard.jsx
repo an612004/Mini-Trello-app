@@ -3,10 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, Users, Star, MoreHorizontal, Eye, Edit3, Trash2 } from 'lucide-react';
 import { boardsAPI } from '../services/api';
 import { useDispatch } from 'react-redux';
-import { removeBoard } from '../store/boardsSlice';
+import { removeBoard, updateBoard } from '../store/boardsSlice';
+import BoardSettingsModal from './BoardSettingsModal';
 
 const BoardCard = ({ board }) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -29,6 +31,14 @@ const BoardCard = ({ board }) => {
     }
   };
 
+  const handleBoardUpdated = (updatedBoard) => {
+    dispatch(updateBoard(updatedBoard));
+  };
+
+  const handleBoardDeleted = () => {
+    dispatch(removeBoard(board.id));
+  };
+
   const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       month: 'short',
@@ -38,7 +48,7 @@ const BoardCard = ({ board }) => {
   };
 
   return (
-    <div className="bg-black rounded-xl shadow-sm border border-black-200 hover:shadow-md transition-shadow duration-200 group">
+    <div className="bg-white rounded-xl shadow-sm border border-gray-200 hover:shadow-lg hover:border-blue-300 transition-all duration-200 group">
       <div 
         className="p-6 cursor-pointer"
         onClick={handleOpenBoard}
@@ -48,16 +58,45 @@ const BoardCard = ({ board }) => {
           <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-600 transition-colors line-clamp-2">
             {board.name}
           </h3>
-          <div className="relative">
+          
+          {/* Action Buttons */}
+          <div className="flex items-center space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                setShowMenu(!showMenu);
+                setShowSettingsModal(true);
               }}
-              className="opacity-0 group-hover:opacity-100 p-1 rounded-md hover:bg-gray-100 transition-all"
+              className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-blue-100 text-blue-600 transition-colors text-xs font-medium"
+              title="Sửa board"
             >
-              <MoreHorizontal className="w-4 h-4 text-gray-500" />
+              <Edit3 className="w-3 h-3" />
+              <span>Sửa</span>
             </button>
+            
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                handleDeleteBoard();
+              }}
+              disabled={loading}
+              className="flex items-center space-x-1 px-2 py-1 rounded-lg hover:bg-red-100 text-red-600 transition-colors disabled:opacity-50 text-xs font-medium"
+              title="Xóa board"
+            >
+              <Trash2 className="w-3 h-3" />
+              <span>{loading ? 'Đang xóa...' : 'Xóa'}</span>
+            </button>
+            
+            <div className="relative">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setShowMenu(!showMenu);
+                }}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 transition-all"
+                title="Thêm tùy chọn"
+              >
+                <MoreHorizontal className="w-4 h-4" />
+              </button>
             
             {showMenu && (
               <div className="absolute right-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
@@ -69,26 +108,11 @@ const BoardCard = ({ board }) => {
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2"
                 >
                   <Eye className="w-4 h-4" />
-                  <span>Open Board</span>
-                </button>
-                <button className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2">
-                  <Edit3 className="w-4 h-4" />
-                  <span>Edit Board</span>
-                </button>
-                <hr className="my-1" />
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    handleDeleteBoard();
-                  }}
-                  disabled={loading}
-                  className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center space-x-2 disabled:opacity-50"
-                >
-                  <Trash2 className="w-4 h-4" />
-                  <span>{loading ? 'Deleting...' : 'Delete Board'}</span>
+                  <span>Mở Board</span>
                 </button>
               </div>
             )}
+            </div>
           </div>
         </div>
 
@@ -155,6 +179,17 @@ const BoardCard = ({ board }) => {
         <div
           className="fixed inset-0 z-0"
           onClick={() => setShowMenu(false)}
+        />
+      )}
+
+      {/* Board Settings Modal */}
+      {showSettingsModal && (
+        <BoardSettingsModal
+          board={board}
+          isOpen={showSettingsModal}
+          onClose={() => setShowSettingsModal(false)}
+          onBoardUpdated={handleBoardUpdated}
+          onBoardDeleted={handleBoardDeleted}
         />
       )}
     </div>

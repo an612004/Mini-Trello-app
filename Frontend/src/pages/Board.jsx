@@ -20,6 +20,7 @@ import TaskCard from '../components/TaskCard';
 import CreateCardModal from '../components/CreateCardModal';
 import CreateListModal from '../components/CreateListModal';
 import InviteMembersModal from '../components/InviteMembersModal';
+import BoardSettingsModal from '../components/BoardSettingsModal';
 import MembersList from '../components/MembersList';
 import useSocket from '../hooks/useSocket';
 
@@ -37,6 +38,7 @@ const Board = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showCreateListModal, setShowCreateListModal] = useState(false);
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [showSidebar, setShowSidebar] = useState(true);
   const [selectedColumnId, setSelectedColumnId] = useState('Todo');
   const [loading, setLoading] = useState(true);
@@ -92,7 +94,20 @@ const Board = () => {
     try {
       const response = await cardsAPI.getAll(boardId);
       const cardsData = response.data || [];
-      dispatch(setCards(cardsData));
+      
+      console.log('📥 Fetched cards from API:', cardsData);
+      
+      // Ensure all cards have a status (default to 'Todo' if missing)
+      const cardsWithStatus = cardsData.map(card => {
+        console.log(`📋 Card "${card.name}" has status:`, card.status || 'Todo (default)');
+        return {
+          ...card,
+          status: card.status || 'Todo'
+        };
+      });
+      
+      console.log('📊 Final cards with status:', cardsWithStatus);
+      dispatch(setCards(cardsWithStatus));
     } catch (error) {
       console.error('Failed to fetch cards:', error);
     } finally {
@@ -132,6 +147,26 @@ const Board = () => {
     }
   };
 
+  const handleBoardUpdated = (updatedBoard) => {
+    dispatch(setCurrentBoard(updatedBoard));
+  };
+
+  const handleBoardDeleted = () => {
+    // Navigate back to dashboard when board is deleted or user leaves
+    navigate('/dashboard');
+  };
+
+  const handleRemoveMemberFromSidebar = async (memberId) => {
+    try {
+      await boardsAPI.removeMember(boardId, memberId);
+      // Refresh board data to update members list
+      await fetchBoardData();
+    } catch (error) {
+      console.error('Remove member error:', error);
+      throw error;
+    }
+  };
+
   const handleCreateList = async (listData) => {
     try {
       const newColumnId = listData.title.replace(/\s+/g, '').toLowerCase();
@@ -155,13 +190,16 @@ const Board = () => {
 
   const handleDeleteCard = async (cardId) => {
     try {
+      console.log('🔄 HandleDeleteCard called:', { boardId, cardId });
+      
       // Call API to delete card from backend
       await cardsAPI.delete(boardId, cardId);
       
+      console.log('✅ API delete successful, updating Redux...');
       // Remove card from Redux store
       dispatch(removeCard(cardId));
     } catch (error) {
-      console.error('Failed to delete card:', error);
+      console.error('❌ Failed to delete card:', error);
       throw error; // Re-throw to let UI components handle the error display
     }
   };
@@ -204,26 +242,58 @@ const Board = () => {
     if (!over || active.id === over.id) return;
 
     const activeCard = cards.find(c => c.id === active.id);
-    const overColumn = over.id;
+    if (!activeCard) return;
 
-    if (activeCard && activeCard.status !== overColumn) {
-      // Update card status
+    // Determine the target column
+    let targetColumnId = over.id;
+    
+    // If dropped over a card, get the column that card belongs to
+    if (cards.find(c => c.id === over.id)) {
+      const targetCard = cards.find(c => c.id === over.id);
+      targetColumnId = targetCard?.status || targetCard?.status;
+    }
+
+    // Check if it's a valid column
+    const validColumn = columns.find(col => col.id === targetColumnId);
+    if (!validColumn) return;
+
+    const oldStatus = activeCard.status;
+    
+    if (oldStatus !== targetColumnId) {
+      console.log(`🔄 Moving card "${activeCard.name}" from ${oldStatus} to ${targetColumnId}`);
+      
+      // Add visual feedback
+      const cardElement = document.querySelector(`[data-card-id="${activeCard.id}"]`);
+      if (cardElement) {
+        cardElement.style.transition = 'transform 0.3s ease-in-out';
+      }
+      
+      // Optimistically update UI first
+      const updatedCards = cards.map(card =>
+        card.id === activeCard.id
+          ? { ...card, status: targetColumnId }
+          : card
+      );
+      dispatch(setCards(updatedCards));
+
+      // Update on server
       try {
         await cardsAPI.update(boardId, activeCard.id, {
-          ...activeCard,
-          status: overColumn
+          status: targetColumnId
         });
-
-        // Update local state
-        const updatedCards = cards.map(card =>
+        console.log('✅ Card status updated successfully');
+      } catch (error) {
+        console.error('❌ Failed to update card status:', error);
+        
+        // Revert optimistic update on error
+        const revertedCards = cards.map(card =>
           card.id === activeCard.id
-            ? { ...card, status: overColumn }
+            ? { ...card, status: oldStatus }
             : card
         );
-        dispatch(setCards(updatedCards));
-      } catch (error) {
-        console.error('Failed to update card:', error);
-        alert('Failed to move card');
+        dispatch(setCards(revertedCards));
+        
+        alert('Không thể di chuyển card. Vui lòng thử lại.');
       }
     }
   };
@@ -273,11 +343,14 @@ const Board = () => {
           {showSidebar && (
             <div className="w-64 flex-shrink-0 bg-white shadow-sm">
               <MembersList
-                members={currentBoard?.members || []}
+                members={currentBoard?.memberDetails || currentBoard?.members || []}
                 boardName={currentBoard?.name || 'My Trello board'}
                 onInviteClick={() => setShowInviteModal(true)}
-                isOwner={true}
+                isOwner={JSON.parse(localStorage.getItem('user') || '{}').id === currentBoard?.ownerId}
                 onClose={() => setShowSidebar(false)}
+                onRemoveMember={handleRemoveMemberFromSidebar}
+                currentUserId={JSON.parse(localStorage.getItem('user') || '{}').id}
+                ownerId={currentBoard?.ownerId}
               />
             </div>
           )}
@@ -317,11 +390,19 @@ const Board = () => {
 
                 <div className="flex items-center space-x-3">
                   <button
+                    onClick={() => setShowSettingsModal(true)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    title="Cài đặt Board"
+                  >
+                    <Settings className="w-5 h-5 text-white" />
+                  </button>
+
+                  <button
                     onClick={() => setShowSidebar(!showSidebar)}
                     className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
                     title="Toggle Sidebar"
                   >
-                    <ArrowLeftRight className="w-5 h-5 text-gray-600" />
+                    <ArrowLeftRight className="w-5 h-5 text-white" />
                   </button>
                   
                   <button
@@ -369,7 +450,9 @@ const Board = () => {
 
               <DragOverlay>
                 {activeCard ? (
-                  <TaskCard card={activeCard} isDragging />
+                  <div className="rotate-2 scale-105 shadow-2xl">
+                    <TaskCard card={activeCard} isDragging />
+                  </div>
                 ) : null}
               </DragOverlay>
             </DndContext>
@@ -397,6 +480,17 @@ const Board = () => {
             <InviteMembersModal
               onClose={() => setShowInviteModal(false)}
               onSubmit={handleInviteMember}
+            />
+          )}
+
+          {/* Board Settings Modal */}
+          {showSettingsModal && (
+            <BoardSettingsModal
+              board={currentBoard}
+              isOpen={showSettingsModal}
+              onClose={() => setShowSettingsModal(false)}
+              onBoardUpdated={handleBoardUpdated}
+              onBoardDeleted={handleBoardDeleted}
             />
           )}
           </div>

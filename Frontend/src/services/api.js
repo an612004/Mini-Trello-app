@@ -51,6 +51,7 @@ export const boardsAPI = {
   delete: (id) => api.delete(`/boards/${id}`),
   invite: (id, data) => api.post(`/boards/${id}/invite`, data),
   acceptInvitation: (data) => api.post('/boards/invitations/accept', data),
+  removeMember: (boardId, memberId) => api.delete(`/boards/${boardId}/members/${memberId}`),
 };
 
 // Cards API
@@ -60,11 +61,20 @@ export const cardsAPI = {
   update: (boardId, cardId, data) => api.put(`/boards/${boardId}/cards/${cardId}`, data),
   delete: async (boardId, cardId) => {
     const url = `/boards/${boardId}/cards/${cardId}`;
+    console.log('🌐 API DELETE request:', { boardId, cardId, url });
     
     try {
       const response = await api.delete(url);
+      console.log('✅ API DELETE success:', response.status);
       return response;
     } catch (error) {
+      console.error('❌ API DELETE error:', {
+        status: error.response?.status,
+        statusText: error.response?.statusText,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
       // Provide more specific error messages
       if (error.response?.status === 401) {
         throw new Error('Vui lòng đăng nhập lại');
@@ -79,6 +89,15 @@ export const cardsAPI = {
       throw error;
     }
   },
+  
+  // Card members
+  addMember: (boardId, cardId, data) => api.post(`/boards/${boardId}/cards/${cardId}/members`, data),
+  removeMember: (boardId, cardId, memberId) => api.delete(`/boards/${boardId}/cards/${cardId}/members/${memberId}`),
+  
+  // Card comments  
+  getComments: (boardId, cardId) => api.get(`/boards/${boardId}/cards/${cardId}/comments`),
+  createComment: (boardId, cardId, data) => api.post(`/boards/${boardId}/cards/${cardId}/comments`, data),
+  deleteComment: (boardId, cardId, commentId) => api.delete(`/boards/${boardId}/cards/${cardId}/comments/${commentId}`),
 };
 
 // Tasks API

@@ -35,7 +35,8 @@ import {
   Card, 
   Task, 
   Invitation,
-  GitHubAttachment 
+  GitHubAttachment,
+  Comment 
 } from '../models/types';
 
 const db = getFirestore(app);
@@ -241,10 +242,18 @@ export class FirebaseService {
   }
 
   static async updateCard(id: string, updates: Partial<Omit<Card, 'id' | 'createdAt'>>): Promise<void> {
-    await updateDoc(doc(db, 'cards', id), {
+    console.log('🔥 Firebase updateCard:', { id, updates });
+    
+    const updateData = {
       ...updates,
       updatedAt: Timestamp.fromDate(new Date())
-    });
+    };
+    
+    console.log('🔥 Final update data:', updateData);
+    
+    await updateDoc(doc(db, 'cards', id), updateData);
+    
+    console.log('✅ Firebase update completed for card:', id);
   }
 
   static async deleteCard(id: string): Promise<void> {
@@ -274,11 +283,17 @@ export class FirebaseService {
   static async getTasksByCardId(cardId: string): Promise<Task[]> {
     const q = query(
       collection(db, 'tasks'), 
-      where('cardId', '==', cardId),
-      orderBy('createdAt', 'desc')
+      where('cardId', '==', cardId)
     );
     const querySnapshot = await getDocs(q);
-    return querySnapshot.docs.map(convertFirestoreData);
+    const tasks = querySnapshot.docs.map(convertFirestoreData);
+    
+    // Sort in memory instead of using orderBy to avoid composite index requirement
+    return tasks.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+      return dateB.getTime() - dateA.getTime();
+    });
   }
 
   static async getTaskById(id: string): Promise<Task | null> {
@@ -359,5 +374,78 @@ export class FirebaseService {
 
   static async deleteGitHubAttachment(id: string): Promise<void> {
     await deleteDoc(doc(db, 'githubAttachments', id));
+  }
+
+  // Comments functions
+  static async createComment(commentData: Partial<Comment>): Promise<Comment> {
+    const id = uuidv4();
+    const now = new Date();
+    
+    const comment: Comment = {
+      id,
+      cardId: commentData.cardId!,
+      userId: commentData.userId!,
+      userEmail: commentData.userEmail!,
+      userName: commentData.userName,
+      userAvatar: commentData.userAvatar || null, // Convert undefined to null
+      content: commentData.content!,
+      createdAt: now,
+      updatedAt: now,
+    };
+
+    // Prepare data for Firebase (remove undefined fields)
+    const firebaseData: any = {
+      id: comment.id,
+      cardId: comment.cardId,
+      userId: comment.userId,
+      userEmail: comment.userEmail,
+      content: comment.content,
+      createdAt: Timestamp.fromDate(now),
+      updatedAt: Timestamp.fromDate(now)
+    };
+
+    // Only add optional fields if they have values
+    if (comment.userName) {
+      firebaseData.userName = comment.userName;
+    }
+    if (comment.userAvatar) {
+      firebaseData.userAvatar = comment.userAvatar;
+    }
+
+    await setDoc(doc(db, 'comments', id), firebaseData);
+    
+    return comment;
+  }
+
+  static async getCommentsByCardId(cardId: string): Promise<Comment[]> {
+    const q = query(
+      collection(db, 'comments'), 
+      where('cardId', '==', cardId)
+    );
+    const querySnapshot = await getDocs(q);
+    const comments = querySnapshot.docs.map(convertFirestoreData);
+    
+    // Sort by createdAt in memory
+    return comments.sort((a, b) => {
+      const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+      const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+      return dateA.getTime() - dateB.getTime();
+    });
+  }
+
+  static async deleteComment(id: string): Promise<void> {
+    await deleteDoc(doc(db, 'comments', id));
+  }
+
+  static async updateComment(id: string, updates: Partial<Comment>): Promise<Comment> {
+    const updatedData = {
+      ...updates,
+      updatedAt: Timestamp.fromDate(new Date())
+    };
+    
+    await updateDoc(doc(db, 'comments', id), updatedData);
+    
+    const updatedDoc = await getDoc(doc(db, 'comments', id));
+    return convertFirestoreData(updatedDoc);
   }
 }

@@ -12,11 +12,11 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
   });
   const [loading, setLoading] = useState(false);
 
-  const priorities = [
-    { value: 'low', label: 'Low', color: 'text-green-600' },
-    { value: 'medium', label: 'Medium', color: 'text-yellow-600' },
-    { value: 'high', label: 'High', color: 'text-red-600' },
-  ];
+  // const priorities = [
+  //   { value: 'low', label: 'Low', color: 'text-green-600' },
+  //   { value: 'medium', label: 'Medium', color: 'text-yellow-600' },
+  //   { value: 'high', label: 'High', color: 'text-red-600' },
+  // ];
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -45,7 +45,8 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
       <div className="bg-black-100 rounded-xl shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">Create New Card</h2>
+          <h2 className="text-xl font-semibold text-white">Create New Card</h2>
+
           <button
             onClick={onClose}
             className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
@@ -58,7 +59,7 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           {/* Card Title */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               <Type className="w-4 h-4 inline mr-1" />
               Card Title *
             </label>
@@ -76,7 +77,7 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
 
           {/* Description */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               <FileText className="w-4 h-4 inline mr-1" />
               Description
             </label>
@@ -93,7 +94,7 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
 
           {/* Status (Column) */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <label className="block text-sm font-medium text-white mb-2">
               Status
             </label>
             <select
@@ -110,9 +111,9 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
             </select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          {/* <div className="grid grid-cols-2 gap-4"> */}
             {/* Priority */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Flag className="w-4 h-4 inline mr-1" />
                 Priority
@@ -129,10 +130,10 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
                   </option>
                 ))}
               </select>
-            </div>
+            </div> */}
 
             {/* Due Date */}
-            <div>
+            {/* <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 <Calendar className="w-4 h-4 inline mr-1" />
                 Due Date
@@ -145,10 +146,10 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Assignees Placeholder */}
-          <div>
+          {/* <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
               <User className="w-4 h-4 inline mr-1" />
               Assignees
@@ -159,7 +160,7 @@ const CreateCardModal = ({ onClose, onSubmit, columns }) => {
                 Assign members after creating the card
               </p>
             </div>
-          </div>
+          </div> */}
 
           {/* Buttons */}
           <div className="flex space-x-3 pt-4">

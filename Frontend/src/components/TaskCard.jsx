@@ -4,7 +4,7 @@ import { Calendar, MessageCircle, Paperclip, User, MoreHorizontal } from 'lucide
 import { useState, useEffect, useRef } from 'react';
 import CardDetailModal from './CardDetailModal';
 
-const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }) => {
+const TaskCard = ({ card, boardId, boardMembers, isDragging = false, onDelete, onUpdate }) => {
   const [showMenu, setShowMenu] = useState(false);
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -39,7 +39,9 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging || isSortableDragging ? 0.5 : 1,
+    opacity: isDragging || isSortableDragging ? 0.7 : 1,
+    scale: isDragging || isSortableDragging ? 1.02 : 1,
+    boxShadow: isDragging || isSortableDragging ? '0 8px 20px rgba(0,0,0,0.15)' : 'none',
   };
 
   const getPriorityColor = (priority) => {
@@ -292,7 +294,7 @@ const TaskCard = ({ card, boardMembers, isDragging = false, onDelete, onUpdate }
     {/* Card Detail Modal */}
     {showDetailModal && (
       <CardDetailModal
-        card={card}
+        card={{...card, boardId: card.boardId || boardId }}
         boardMembers={boardMembers || []}
         onClose={() => {
           setShowDetailModal(false);

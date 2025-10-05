@@ -8,5 +8,10 @@ export declare class CardController {
     static updateCard(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
     static deleteCard(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
     static acceptCardInvitation(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    static addMemberToCard(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    static removeMemberFromCard(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    static createComment(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    static getComments(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
+    static deleteComment(req: AuthRequest, res: Response): Promise<Response<any, Record<string, any>> | undefined>;
 }
 //# sourceMappingURL=cardController.d.ts.map

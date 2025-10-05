@@ -172,10 +172,14 @@ class FirebaseService {
         return cards.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
     }
     static async updateCard(id, updates) {
-        await (0, firestore_1.updateDoc)((0, firestore_1.doc)(db, 'cards', id), {
+        console.log('🔥 Firebase updateCard:', { id, updates });
+        const updateData = {
             ...updates,
             updatedAt: firestore_1.Timestamp.fromDate(new Date())
-        });
+        };
+        console.log('🔥 Final update data:', updateData);
+        await (0, firestore_1.updateDoc)((0, firestore_1.doc)(db, 'cards', id), updateData);
+        console.log('✅ Firebase update completed for card:', id);
     }
     static async deleteCard(id) {
         await (0, firestore_1.deleteDoc)((0, firestore_1.doc)(db, 'cards', id));
@@ -198,9 +202,15 @@ class FirebaseService {
         return task;
     }
     static async getTasksByCardId(cardId) {
-        const q = (0, firestore_1.query)((0, firestore_1.collection)(db, 'tasks'), (0, firestore_1.where)('cardId', '==', cardId), (0, firestore_1.orderBy)('createdAt', 'desc'));
+        const q = (0, firestore_1.query)((0, firestore_1.collection)(db, 'tasks'), (0, firestore_1.where)('cardId', '==', cardId));
         const querySnapshot = await (0, firestore_1.getDocs)(q);
-        return querySnapshot.docs.map(convertFirestoreData);
+        const tasks = querySnapshot.docs.map(convertFirestoreData);
+        // Sort in memory instead of using orderBy to avoid composite index requirement
+        return tasks.sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+            const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+            return dateB.getTime() - dateA.getTime();
+        });
     }
     static async getTaskById(id) {
         const taskDoc = await (0, firestore_1.getDoc)((0, firestore_1.doc)(db, 'tasks', id));
@@ -264,6 +274,64 @@ class FirebaseService {
     }
     static async deleteGitHubAttachment(id) {
         await (0, firestore_1.deleteDoc)((0, firestore_1.doc)(db, 'githubAttachments', id));
+    }
+    // Comments functions
+    static async createComment(commentData) {
+        const id = (0, uuid_1.v4)();
+        const now = new Date();
+        const comment = {
+            id,
+            cardId: commentData.cardId,
+            userId: commentData.userId,
+            userEmail: commentData.userEmail,
+            userName: commentData.userName,
+            userAvatar: commentData.userAvatar || null, // Convert undefined to null
+            content: commentData.content,
+            createdAt: now,
+            updatedAt: now,
+        };
+        // Prepare data for Firebase (remove undefined fields)
+        const firebaseData = {
+            id: comment.id,
+            cardId: comment.cardId,
+            userId: comment.userId,
+            userEmail: comment.userEmail,
+            content: comment.content,
+            createdAt: firestore_1.Timestamp.fromDate(now),
+            updatedAt: firestore_1.Timestamp.fromDate(now)
+        };
+        // Only add optional fields if they have values
+        if (comment.userName) {
+            firebaseData.userName = comment.userName;
+        }
+        if (comment.userAvatar) {
+            firebaseData.userAvatar = comment.userAvatar;
+        }
+        await (0, firestore_1.setDoc)((0, firestore_1.doc)(db, 'comments', id), firebaseData);
+        return comment;
+    }
+    static async getCommentsByCardId(cardId) {
+        const q = (0, firestore_1.query)((0, firestore_1.collection)(db, 'comments'), (0, firestore_1.where)('cardId', '==', cardId));
+        const querySnapshot = await (0, firestore_1.getDocs)(q);
+        const comments = querySnapshot.docs.map(convertFirestoreData);
+        // Sort by createdAt in memory
+        return comments.sort((a, b) => {
+            const dateA = a.createdAt instanceof Date ? a.createdAt : new Date(a.createdAt);
+            const dateB = b.createdAt instanceof Date ? b.createdAt : new Date(b.createdAt);
+            return dateA.getTime() - dateB.getTime();
+        });
+    }
+    static async deleteComment(id) {
+        await (0, firestore_1.deleteDoc)((0, firestore_1.doc)(db, 'comments', id));
+    }
+    static async updateComment(id, updates) {
+        const updatedData = {
+            ...updates,
+            updatedAt: firestore_1.Timestamp.fromDate(new Date())
+        };
+        await (0, firestore_1.updateDoc)((0, firestore_1.doc)(db, 'comments', id), updatedData);
+        const updatedDoc = await (0, firestore_1.getDoc)((0, firestore_1.doc)(db, 'comments', id));
+        return convertFirestoreData(updatedDoc);
     }
 }
 exports.FirebaseService = FirebaseService;

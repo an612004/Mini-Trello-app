@@ -82,6 +82,17 @@ export interface GitHubAttachment {
     url: string;
     createdAt: Date;
 }
+export interface Comment {
+    id: string;
+    cardId: string;
+    userId: string;
+    userEmail: string;
+    userName?: string;
+    userAvatar?: string | null;
+    content: string;
+    createdAt: Date;
+    updatedAt?: Date;
+}
 export interface GitHubRepository {
     id: string;
     githubId: string;

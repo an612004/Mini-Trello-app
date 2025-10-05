@@ -1,4 +1,4 @@
-import { User, VerificationCode, Board, Card, Task, Invitation, GitHubAttachment } from '../models/types';
+import { User, VerificationCode, Board, Card, Task, Invitation, GitHubAttachment, Comment } from '../models/types';
 export declare class FirebaseService {
     static createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User>;
     static getUserById(id: string): Promise<User | null>;
@@ -30,5 +30,9 @@ export declare class FirebaseService {
     static createGitHubAttachment(attachmentData: Omit<GitHubAttachment, 'id' | 'createdAt'>): Promise<GitHubAttachment>;
     static getGitHubAttachmentsByTaskId(taskId: string): Promise<GitHubAttachment[]>;
     static deleteGitHubAttachment(id: string): Promise<void>;
+    static createComment(commentData: Partial<Comment>): Promise<Comment>;
+    static getCommentsByCardId(cardId: string): Promise<Comment[]>;
+    static deleteComment(id: string): Promise<void>;
+    static updateComment(id: string, updates: Partial<Comment>): Promise<Comment>;
 }
 //# sourceMappingURL=firebase.d.ts.map
