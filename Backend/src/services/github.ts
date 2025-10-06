@@ -79,7 +79,7 @@ export class GitHubService {
     }
   }
 
-  // Get user info from GitHub
+  // Lấy thông tin người dùng từ GitHub
   static async getUserInfo(accessToken: string) {
     try {
       const response = await this.makeGitHubRequest('https://api.github.com/user', accessToken);
@@ -95,7 +95,7 @@ export class GitHubService {
     }
   }
 
-  // Get specific pull request
+  // Lấy pull request cụ thể
   static async getPullRequest(owner: string, repo: string, number: number, accessToken?: string) {
     try {
       const url = `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`;
@@ -106,7 +106,7 @@ export class GitHubService {
     }
   }
 
-  // Get specific issue
+  // Lấy issue cụ thể
   static async getIssue(owner: string, repo: string, number: number, accessToken?: string) {
     try {
       const url = `https://api.github.com/repos/${owner}/${repo}/issues/${number}`;
@@ -117,7 +117,7 @@ export class GitHubService {
     }
   }
 
-  // Get specific commit
+  // Lấy commit cụ thể
   static async getCommit(owner: string, repo: string, sha: string, accessToken?: string) {
     try {
       const url = `https://api.github.com/repos/${owner}/${repo}/commits/${sha}`;

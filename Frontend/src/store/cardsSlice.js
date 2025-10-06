@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+// Khởi tạo trạng thái ban đầu
 const initialState = {
   cards: [],
   loading: false,
   error: null,
 };
-
+// Tạo slice thẻ
 const cardsSlice = createSlice({
   name: 'cards',
   initialState,
@@ -39,7 +39,7 @@ const cardsSlice = createSlice({
     },
   },
 });
-
+// Xuất các action và reducer
 export const {
   setCardsLoading,
   setCardsError,

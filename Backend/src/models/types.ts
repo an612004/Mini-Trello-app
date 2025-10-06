@@ -3,10 +3,10 @@ export interface User {
   email: string;
   githubId?: string;
   githubUsername?: string;
-  createdAt: Date;
-  updatedAt: Date;
+  createdAt: Date; // Thời gian tạo
+  updatedAt: Date; // Thời gian cập nhật
 }
-
+// Thời gian cập nhật
 export interface VerificationCode {
   id: string;
   email: string;
@@ -16,7 +16,6 @@ export interface VerificationCode {
   used: boolean;
   createdAt: Date;
 }
-
 export interface Board {
   id: string;
   name: string;

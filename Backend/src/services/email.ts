@@ -3,11 +3,12 @@ import dotenv from "dotenv";
 dotenv.config();
 
 // Log để debug
+// Ẩn mật khẩu trong log
 console.log('📧 Email Configuration:', {
     user: process.env.USER_EMAIL,
     pass: process.env.PASS_EMAIL ? '***' + process.env.PASS_EMAIL.slice(-4) : 'undefined'
 });
-
+// Tạo transporter sử dụng Gmail SMTP
 const transporter = nodemailer.createTransport({
   service: "gmail", 
   auth: {
@@ -75,7 +76,7 @@ export async function sendVerificationCode(to: string, code: string, type: 'sign
         throw new Error(`Failed to send email: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 }
-
+// Gửi email mời cộng tác vào board
 export async function sendInvitationEmail(to: string, inviterEmail: string, boardName: string, inviteLink: string) {
     const mailOptions = {
         from: process.env.USER_EMAIL,

@@ -5,7 +5,7 @@ import { authenticateToken } from '../middlewares/auth';
 
 const router = Router();
 
-// Public routes (không cần authentication)
+// Các route công khai (không cần xác thực)
 router.post('/send-code', AuthController.sendCode);
 router.post('/signup', AuthController.signup);
 router.post('/signin', AuthController.signin);

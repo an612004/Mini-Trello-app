@@ -16,7 +16,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { initializeApp } from "firebase/app";
 
-// Initialize Firebase app
+// Khởi tạo ứng dụng Firebase
+// kết nối với Firestore
 const firebaseConfig = {
   apiKey: process.env.apiKey!,
   authDomain: "minitrelooapp.firebaseapp.com",
@@ -26,7 +27,7 @@ const firebaseConfig = {
   appId: process.env.appId!,
   measurementId: process.env.measurementId!,
 };
-
+// Khởi tạo ứng dụng Firebase
 const app = initializeApp(firebaseConfig);
 import { 
   User, 
@@ -42,6 +43,7 @@ import {
 const db = getFirestore(app);
 
 // Utility function to convert Firestore data
+// chuyển đổi dữ liệu Firestore 
 const convertFirestoreData = (doc: any) => {
   const data = doc.data();
   if (data.createdAt && data.createdAt.toDate) {
@@ -58,6 +60,7 @@ const convertFirestoreData = (doc: any) => {
 
 export class FirebaseService {
   // User operations
+  // Tạo user mới
   static async createUser(userData: Omit<User, 'id' | 'createdAt' | 'updatedAt'>): Promise<User> {
     const id = uuidv4();
     const now = new Date();
@@ -67,7 +70,7 @@ export class FirebaseService {
       createdAt: now,
       updatedAt: now
     };
-    
+    // Lưu user vào Firestore
     await setDoc(doc(db, 'users', id), {
       ...user,
       createdAt: Timestamp.fromDate(now),
@@ -76,24 +79,24 @@ export class FirebaseService {
     
     return user;
   }
-
+// Lấy user theo ID
   static async getUserById(id: string): Promise<User | null> {
     const userDoc = await getDoc(doc(db, 'users', id));
     return userDoc.exists() ? convertFirestoreData(userDoc) : null;
   }
-
+// Lấy user theo email
   static async getUserByEmail(email: string): Promise<User | null> {
     const q = query(collection(db, 'users'), where('email', '==', email));
     const querySnapshot = await getDocs(q);
     return querySnapshot.empty ? null : convertFirestoreData(querySnapshot.docs[0]);
   }
-
+// Lấy user theo githubId
   static async getUserByGithubId(githubId: string): Promise<User | null> {
     const q = query(collection(db, 'users'), where('githubId', '==', githubId));
     const querySnapshot = await getDocs(q);
     return querySnapshot.empty ? null : convertFirestoreData(querySnapshot.docs[0]);
   }
-
+// Cập nhật thông tin user
   static async updateUser(id: string, updates: Partial<Omit<User, 'id' | 'createdAt'>>): Promise<void> {
     await updateDoc(doc(db, 'users', id), {
       ...updates,
@@ -101,7 +104,7 @@ export class FirebaseService {
     });
   }
 
-  // Verification Code operations
+  // Tạo mã xác minh
   static async createVerificationCode(codeData: Omit<VerificationCode, 'id' | 'createdAt'>): Promise<VerificationCode> {
     const id = uuidv4();
     const now = new Date();
@@ -110,7 +113,7 @@ export class FirebaseService {
       ...codeData,
       createdAt: now
     };
-    
+    // Lưu mã xác minh vào Firestore
     await setDoc(doc(db, 'verificationCodes', id), {
       ...verificationCode,
       createdAt: Timestamp.fromDate(now),
@@ -119,7 +122,7 @@ export class FirebaseService {
     
     return verificationCode;
   }
-
+// Lấy mã xác minh hợp lệ
   static async getValidVerificationCode(email: string, code: string, type: 'signup' | 'signin'): Promise<VerificationCode | null> {
     const q = query(
       collection(db, 'verificationCodes'), 
@@ -135,18 +138,20 @@ export class FirebaseService {
     const verificationCode = convertFirestoreData(querySnapshot.docs[0]);
     
     // Check if code is still valid (not expired)
+    // Kiểm tra mã còn hợp lệ (chưa hết hạn)
     if (verificationCode.expiresAt < new Date()) {
       return null;
     }
     
     return verificationCode;
   }
-
+// Đánh dấu mã xác minh đã sử dụng
   static async markVerificationCodeAsUsed(id: string): Promise<void> {
     await updateDoc(doc(db, 'verificationCodes', id), { used: true });
   }
 
   // Board operations
+  // Tạo board mới
   static async createBoard(boardData: Omit<Board, 'id' | 'createdAt' | 'updatedAt'>): Promise<Board> {
     const id = uuidv4();
     const now = new Date();
@@ -156,7 +161,7 @@ export class FirebaseService {
       createdAt: now,
       updatedAt: now
     };
-    
+    // Lưu board vào Firestore
     await setDoc(doc(db, 'boards', id), {
       ...board,
       createdAt: Timestamp.fromDate(now),
@@ -165,12 +170,12 @@ export class FirebaseService {
     
     return board;
   }
-
+// Lấy board theo ID
   static async getBoardById(id: string): Promise<Board | null> {
     const boardDoc = await getDoc(doc(db, 'boards', id));
     return boardDoc.exists() ? convertFirestoreData(boardDoc) : null;
   }
-
+// Lấy boards theo userId
   static async getBoardsByUserId(userId: string): Promise<Board[]> {
     const q = query(
       collection(db, 'boards'), 
@@ -181,7 +186,7 @@ export class FirebaseService {
     // Sort in memory instead of Firestore
     return boards.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
   }
-
+// Cập nhật thông tin board
   static async updateBoard(id: string, updates: Partial<Omit<Board, 'id' | 'createdAt'>>): Promise<void> {
     await updateDoc(doc(db, 'boards', id), {
       ...updates,
@@ -194,6 +199,7 @@ export class FirebaseService {
   }
 
   // Card operations
+  // Tạo card mới
   static async createCard(cardData: Omit<Card, 'id' | 'createdAt' | 'updatedAt'>): Promise<Card> {
     const id = uuidv4();
     const now = new Date();

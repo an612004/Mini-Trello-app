@@ -1,12 +1,12 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+// Khởi tạo trạng thái ban đầu
 const initialState = {
   boards: [],
   currentBoard: null,
   loading: false,
   error: null,
 };
-
+// Tạo slice bảng
 const boardsSlice = createSlice({
   name: 'boards',
   initialState,
@@ -43,7 +43,7 @@ const boardsSlice = createSlice({
     },
   },
 });
-
+// Xuất các action và reducer
 export const {
   setBoardsLoading,
   setBoardsError,

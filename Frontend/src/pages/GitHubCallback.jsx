@@ -16,7 +16,7 @@ const GitHubCallback = () => {
       try {
         const user = JSON.parse(decodeURIComponent(userParam));
         
-        // Save to Redux store
+        // Lưu vào cửa hàng Redux 
         dispatch(loginSuccess({ token, user }));
         
         // Redirect to dashboard
@@ -34,8 +34,8 @@ const GitHubCallback = () => {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <div className="text-center">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-        <h2 className="text-lg font-medium text-gray-900">Processing GitHub Authentication...</h2>
-        <p className="text-gray-600 mt-2">Please wait while we complete your sign in.</p>
+        <h2 className="text-lg font-medium text-gray-900">Đang xử lý xác thực GitHub...</h2>
+        <p className="text-gray-600 mt-2">Vui lòng chờ trong khi chúng tôi hoàn tất đăng nhập của bạn.</p>
       </div>
     </div>
   );

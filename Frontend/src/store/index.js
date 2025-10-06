@@ -3,7 +3,7 @@ import authReducer from './authSlice';
 import boardsReducer from './boardsSlice';
 import cardsReducer from './cardsSlice';
 import tasksReducer from './tasksSlice';
-
+// Cấu hình store với các slice reducer
 export const store = configureStore({
   reducer: {
     auth: authReducer,
@@ -12,5 +12,5 @@ export const store = configureStore({
     tasks: tasksReducer,
   },
 });
-
+// Xuất store làm mặc định
 export default store;

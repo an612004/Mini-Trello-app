@@ -4,14 +4,14 @@ import { AuthRequest } from '../middlewares/auth';
 import { sendInvitationEmail } from '../services/email';
 
 export class BoardController {
-  // Create a new board
+  // Tạo 1 board mới
   static async createBoard(req: AuthRequest, res: Response) {
     try {
       const { name, description } = req.body;
       const userId = req.user!.id;
 
-      if (!name) {
-        return res.status(400).json({ error: 'Board name is required' });
+      if (!name) { // xét ko null
+        return res.status(400).json({ error: 'Tên board là bắt buộc' });
       }
 
       const board = await FirebaseService.createBoard({
@@ -20,7 +20,7 @@ export class BoardController {
         ownerId: userId,
         members: [userId]
       });
-
+// Trả về thông tin board mới tạo
       res.status(201).json({
         id: board.id,
         name: board.name,
@@ -32,13 +32,13 @@ export class BoardController {
     }
   }
 
-  // Get all boards for authenticated user
+  // Lấy danh sách board của user
   static async getBoards(req: AuthRequest, res: Response) {
     try {
       const userId = req.user!.id;
 
       const boards = await FirebaseService.getBoardsByUserId(userId);
-
+// Trả về danh sách board
       res.status(200).json(boards.map(board => ({
         id: board.id,
         name: board.name,
@@ -112,7 +112,7 @@ export class BoardController {
         return res.status(404).json({ error: 'Board not found' });
       }
 
-      // Check if user is owner or has access
+      // kiểm tra nếu user là owner hoặc thành viên
       if (board.ownerId !== userId && !board.members.includes(userId)) {
         return res.status(403).json({ error: 'Access denied' });
       }
@@ -272,6 +272,7 @@ export class BoardController {
   // Remove member from board
   static async removeMember(req: AuthRequest, res: Response) {
     try {
+      // Remove a member from the board
       const { id, memberId } = req.params;
       const userId = req.user!.id;
 

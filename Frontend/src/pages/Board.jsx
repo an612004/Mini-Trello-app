@@ -378,11 +378,11 @@ const Board = () => {
                       </span>
                     </div> */}
                     <div>
-                      <h1 className="text-xl font-bold text-white-900">
+                      <h1 className="text-xl font-bold text-white">
                         {currentBoard?.name || 'Board'}
                       </h1>
                       {currentBoard?.description && (
-                        <p className="text-sm text-white-600">{currentBoard.description}</p>
+                        <p className="text-sm text-white">{currentBoard.description}</p>
                       )}
                     </div>
                   </div>

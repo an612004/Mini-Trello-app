@@ -42,7 +42,6 @@ const Column = ({ column, cards, boardId, boardMembers, onAddCard, onDeleteCard,
                 <button
                   onClick={() => {
                     setShowColumnMenu(false);
-                    // TODO: Add edit list functionality
                     alert('Edit list functionality coming soon!');
                   }}
                   className="w-full text-left px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"

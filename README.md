@@ -2,6 +2,13 @@
 
 ---
 
+## 📞 **Support & Contact**
+
+- **Developer:** anbi
+- **Email:** hobinhan@gmail.com
+- **GitHub:** https://github.com/an612004/Mini-Trello-app
+- **Documentation:** https://docs.mini-trello.com
+
 ## 📸 Ảnh chụp màn hình (Screenshots)
 
 Dưới đây là các giao diện chính của ứng dụng:

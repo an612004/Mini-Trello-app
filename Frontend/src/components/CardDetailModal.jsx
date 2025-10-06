@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { X, Calendar, Flag, User, MessageCircle, Archive, Eye, Github, Link, FileText, Edit2, Save, Plus, UserCheck, UserX } from 'lucide-react';
+import { X, Calendar, Flag,UsersRound, User, MessageCircle, Archive, Trash, Eye, Github, Link, FileText, Edit2, Save, Plus, UserCheck, UserX , UserPlus } from 'lucide-react';
 
 const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -296,7 +296,7 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
             {/* Members Section */}
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <span className="text-sm text-gray-400">Members</span>
+                <span  className="text-sm text-gray-400">Members</span>
                 <div className="flex items-center space-x-1">
                   {formData.assignees.map((assignee, index) => (
                     <div
@@ -322,9 +322,9 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
                   ))}
                   <button 
                     onClick={() => setShowAssigneeModal(true)}
-                    className="w-8 h-8 bg-gray-600 hover:bg-gray-500 rounded-full flex items-center justify-center text-gray-300 transition-colors"
+                    // className="w-8 h-8 bg-gray-600 hover:bg-gray-500 rounded-full flex items-center justify-center text-gray-300 transition-colors"
                   >
-                    <Plus className="w-4 h-4" />
+                    <UsersRound className="w-4 h-4 " />
                   </button>
                 </div>
               </div>
@@ -446,7 +446,7 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
                       onClick={() => setShowAddMember(!showAddMember)}
                       className="p-1 hover:bg-gray-600 rounded text-xs"
                     >
-                      <Plus className="w-3 h-3" />
+                      <UserPlus className="w-5 h-5" />
                     </button>
                   </div>
                   
@@ -505,9 +505,10 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
             <div>
               <h4 className="text-sm font-medium text-gray-300 mb-3">Power-Ups</h4>
               <div className="space-y-2">
-                <button className="w-full flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors">
+                <button onClick={() => setShowAddMember(!showAddMember)} className="w-full flex items-center space-x-2 px-3 py-2 bg-gray-700 hover:bg-gray-600 rounded text-sm transition-colors">
                   <Github className="w-4 h-4" />
                   <span>GitHub</span>
+
                 </button>
               </div>
             </div>
@@ -567,8 +568,8 @@ const CardDetailModal = ({ card, onClose, onDelete, onUpdate, boardMembers = [] 
                   disabled={loading}
                   className="w-full flex items-center justify-center space-x-2 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:bg-red-400 disabled:cursor-not-allowed rounded-lg text-sm font-semibold text-white transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800"
                 >
-                  <Archive className="w-4 h-4" />
-                  <span>{loading ? 'Đang xóa...' : '🗑️ Xóa Card Vĩnh Viễn'}</span>
+                  <Trash className="w-4 h-4" />
+                  <span>{loading ? 'Đang xóa...' : 'Xóa Card'}</span>
                 </button>
               </div>
             </div>

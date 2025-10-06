@@ -1,11 +1,11 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+// Khởi tạo trạng thái ban đầu
 const initialState = {
   tasks: [],
   loading: false,
   error: null,
 };
-
+// Tạo slice nhiệm vụ
 const tasksSlice = createSlice({
   name: 'tasks',
   initialState,
@@ -39,7 +39,7 @@ const tasksSlice = createSlice({
     },
   },
 });
-
+// Xuất các action và reducer
 export const {
   setTasksLoading,
   setTasksError,

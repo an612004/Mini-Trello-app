@@ -1,6 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
-
-// Safe localStorage parsing
+// Lấy thông tin người dùng từ localStorage
 const getUserFromStorage = () => {
   try {
     const user = localStorage.getItem('user');
@@ -11,12 +10,12 @@ const getUserFromStorage = () => {
     return null;
   }
 };
-
+// Phân tích cú pháp localStorage an toàn
 const getTokenFromStorage = () => {
   const token = localStorage.getItem('token');
   return token && token !== 'undefined' && token !== 'null' ? token : null;
 };
-
+// Khởi tạo trạng thái ban đầu
 const initialState = {
   user: getUserFromStorage(),
   token: getTokenFromStorage(),
@@ -24,7 +23,7 @@ const initialState = {
   loading: false,
   error: null,
 };
-
+// Tạo slice xác thực
 const authSlice = createSlice({
   name: 'auth',
   initialState,
@@ -40,10 +39,11 @@ const authSlice = createSlice({
       state.token = action.payload.token;
       state.error = null;
       
-      // Save to localStorage
+      // Lưu vào localStorage
       localStorage.setItem('token', action.payload.token);
       localStorage.setItem('user', JSON.stringify(action.payload.user));
     },
+    // Xử lý đăng nhập thất bại
     loginFailure: (state, action) => {
       state.loading = false;
       state.error = action.payload;
